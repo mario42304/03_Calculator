@@ -1,11 +1,13 @@
 import { useState } from 'react'
+import isValidTokens from './myLib.ts'
+import alertFunction from './handleError.ts'
 import './App.css'
 
 function App() {
   const [answer, setAnswer] = useState('')
   const [inputValue, setInputValue] = useState('')
-  const [operator, setOperator] = useState<string | null>(null)
-  const [overWrite, setOverwrite] = useState(false)
+
+  
 
   const handleInput = (input: string) => {
     setInputValue(prev => {
@@ -14,6 +16,10 @@ function App() {
       }
       return prev + input
     })
+  }
+
+  const handleAllClear = () => {
+    setInputValue('')
   }
 
   const handleBackspace = () => {
@@ -29,12 +35,26 @@ function App() {
     })
   }
 
-  const handleCaluculate = () => {
+  const throwSyntaxError = () => {
+    alertFunction("SyntaxError")
+    setInputValue('')
+  } 
 
+  const tokenizer = (input: string) => {
+    const regex = /±?\d+(\.\d+)?|[+\-*/()]|\S/g
+    return input.match(regex)
   }
 
-  const handleInputError = () => {
-    throw new Error("SYNTAX ERROR");
+  const handleCaluculate = (input: string) => {
+    setInputValue(prev => prev.replace(/±/g, '-'))
+    const tokens = tokenizer(input)
+
+    if(isValidTokens(tokens)) {
+      alertFunction(['Success', tokens])
+    }else if(tokens){
+      throwSyntaxError()
+    }
+    
   }
 
   return (
@@ -46,30 +66,35 @@ function App() {
         <button onClick={() => handleInput('8')}>8</button>
         <button onClick={() => handleInput('9')}>9</button>
         <button onClick={() => handleInput('+')}>+</button>
+        <button onClick={() => handleAllClear()}>AC</button>
       </div>
       <div>
         <button onClick={() => handleInput('4')}>4</button>
         <button onClick={() => handleInput('5')}>5</button>
         <button onClick={() => handleInput('6')}>6</button>
         <button onClick={() => handleInput('-')}>-</button>
+        <button onClick={() => handleAllClear()}>AC</button>
       </div>
       <div>
         <button onClick={() => handleInput('1')}>1</button>
         <button onClick={() => handleInput('2')}>2</button>
         <button onClick={() => handleInput('3')}>3</button>
         <button onClick={() => handleInput('*')}>*</button>
+        <button onClick={() => handleAllClear()}>AC</button>
       </div>
       <div>
         <button onClick={() => handleSignFlip()}>±</button>
         <button onClick={() => handleInput('0')}>0</button>
         <button onClick={() => handleInput('.')}>.</button>
         <button onClick={() => handleInput('/')}>/</button>
+        <button onClick={() => handleAllClear()}>AC</button>
       </div>
       <div>
-        <button onClick={() => handleCaluculate()}>=</button>
+        <button onClick={() => handleCaluculate(inputValue)}>=</button>
         <button onClick={() => handleBackspace()}>BS</button>
-        <button onClick={() => handleInput('')}></button>
-        <button onClick={() => handleInput('')}></button>
+        <button onClick={() => handleInput('(')}>(</button>
+        <button onClick={() => handleInput(')')}>)</button>
+        <button onClick={() => handleAllClear()}>AC</button>
       </div>
     </>
   )
